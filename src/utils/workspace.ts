@@ -12,8 +12,9 @@ export async function getActiveWorkspace() {
   // Get user's workspaces
   const { data: members, error } = await supabase
     .from('workspace_members')
-    .select('workspace_id, workspaces(id, name, currency)')
+    .select('workspace_id, role, workspaces(id, name, currency)')
     .eq('user_id', user.id)
+    .order('role', { ascending: false }) // 'owner' comes before 'member'
     .limit(1)
     .single()
 

@@ -46,7 +46,8 @@ export default async function SettingsPage() {
                   name="name"
                   defaultValue={workspaceName}
                   required
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  disabled={!isOwner}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
@@ -133,7 +134,8 @@ export default async function SettingsPage() {
               id="currency"
               name="currency"
               defaultValue={currency}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              disabled={!isOwner}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="USD">USD ($)</option>
               <option value="EUR">EUR (€)</option>
