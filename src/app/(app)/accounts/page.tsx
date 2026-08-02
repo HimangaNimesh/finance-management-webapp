@@ -1,9 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { getActiveWorkspace } from '@/utils/workspace'
-import { addAccount, deleteAccount } from './actions'
+import { addAccount } from './actions'
 import { SubmitButton } from '@/components/SubmitButton'
-import { Landmark, Trash2, Plus } from 'lucide-react'
-import { formatCurrency } from '@/utils/format'
+import { Landmark, Plus } from 'lucide-react'
+import { AccountCard } from './AccountCard'
 
 export default async function AccountsPage() {
   const { workspaceId, currency } = await getActiveWorkspace()
@@ -25,33 +25,7 @@ export default async function AccountsPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-4">
           {accounts?.map((account) => (
-            <div key={account.id} className="bg-card border border-border rounded-xl p-5 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/10 rounded-full text-primary">
-                  <Landmark className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground text-lg">{account.name}</h3>
-                  <p className="text-sm text-muted-foreground capitalize">{account.type}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-6">
-                <div className="text-right">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Balance</p>
-                  <p className={`font-bold text-xl ${account.current_balance >= 0 ? 'text-success' : 'text-destructive'}`}>
-                    {formatCurrency(account.current_balance, currency)}
-                  </p>
-                </div>
-                <form action={async () => {
-                  'use server'
-                  await deleteAccount(account.id)
-                }}>
-                  <SubmitButton type="submit" pendingText="Deleting..." className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors">
-                    <Trash2 className="w-5 h-5" />
-                  </SubmitButton>
-                </form>
-              </div>
-            </div>
+            <AccountCard key={account.id} account={account} currency={currency} />
           ))}
           {accounts?.length === 0 && (
             <div className="text-center p-12 border border-dashed border-border rounded-xl">

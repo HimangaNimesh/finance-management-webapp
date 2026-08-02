@@ -43,3 +43,45 @@ export async function deleteAccount(accountId: string) {
 
   revalidatePath('/accounts')
 }
+
+export async function editAccount(formData: FormData) {
+  const { workspaceId } = await getActiveWorkspace()
+  const supabase = await createClient()
+
+  const id = formData.get('id') as string
+  const name = formData.get('name') as string
+  const type = formData.get('type') as string
+  const new_starting_balance = parseFloat(formData.get('starting_balance') as string)
+
+  // Fetch the old account to calculate balance difference
+  const { data: oldAccount, error: fetchError } = await supabase
+    .from('accounts')
+    .select('starting_balance, current_balance')
+    .eq('id', id)
+    .eq('workspace_id', workspaceId)
+    .single()
+
+  if (fetchError || !oldAccount) {
+    throw new Error('Account not found')
+  }
+
+  const diff = new_starting_balance - oldAccount.starting_balance
+  const new_current_balance = oldAccount.current_balance + diff
+
+  const { error } = await supabase
+    .from('accounts')
+    .update({
+      name,
+      type,
+      starting_balance: new_starting_balance,
+      current_balance: new_current_balance,
+    })
+    .eq('id', id)
+    .eq('workspace_id', workspaceId)
+
+  if (error) {
+    throw new Error('Failed to update account: ' + error.message)
+  }
+
+  revalidatePath('/accounts')
+}
