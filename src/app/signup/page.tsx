@@ -41,6 +41,22 @@ export default async function SignupPage(props: { searchParams: Promise<{ messag
             </div>
 
             <div>
+              <label className="block text-sm font-medium leading-6 text-foreground" htmlFor="full_name">
+                Full Name
+              </label>
+              <div className="mt-2">
+                <input
+                  id="full_name"
+                  name="full_name"
+                  type="text"
+                  required
+                  className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-muted placeholder:text-muted-foreground focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6 bg-white/50 backdrop-blur-sm px-3 outline-none"
+                  placeholder="John Doe"
+                />
+              </div>
+            </div>
+
+            <div>
               <label className="block text-sm font-medium leading-6 text-foreground" htmlFor="password">
                 Password
               </label>

@@ -16,11 +16,13 @@ export async function inviteMember(formData: FormData) {
   })
 
   if (error) {
-    throw new Error(error.message)
+    return { error: error.message }
   }
 
   revalidatePath('/settings')
 }
+
+
 
 export async function removeMember(userId: string) {
   const { workspaceId } = await getActiveWorkspace()
@@ -40,6 +42,8 @@ export async function removeMember(userId: string) {
   revalidatePath('/settings')
 }
 
+
+
 export async function updateCurrency(formData: FormData) {
   const { workspaceId } = await getActiveWorkspace()
   const supabase = await createClient()
@@ -53,6 +57,39 @@ export async function updateCurrency(formData: FormData) {
 
   if (error) {
     throw new Error('Failed to update currency: ' + error.message)
+  }
+
+  revalidatePath('/', 'layout')
+}
+
+export async function updateProfileName(formData: FormData) {
+  const supabase = await createClient()
+  const full_name = formData.get('full_name') as string
+
+  const { error } = await supabase.auth.updateUser({
+    data: { full_name }
+  })
+
+  if (error) {
+    throw new Error('Failed to update name: ' + error.message)
+  }
+
+  revalidatePath('/settings')
+}
+
+export async function renameWorkspace(formData: FormData) {
+  const { workspaceId } = await getActiveWorkspace()
+  const supabase = await createClient()
+
+  const name = formData.get('name') as string
+
+  const { error } = await supabase
+    .from('workspaces')
+    .update({ name })
+    .eq('id', workspaceId)
+
+  if (error) {
+    throw new Error('Failed to rename workspace: ' + error.message)
   }
 
   revalidatePath('/', 'layout')

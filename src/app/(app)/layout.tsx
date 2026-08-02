@@ -14,9 +14,11 @@ export default async function AppLayout({
     redirect('/login')
   }
 
+  const fullName = user.user_metadata?.full_name || user.email
+
   return (
     <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-background">
-      <Navigation />
+      <Navigation userName={fullName} />
       <main className="flex-1 overflow-y-auto p-4 md:p-8">
         <div className="mx-auto max-w-7xl animate-fade-in pb-12 md:pb-0">
           {children}

@@ -25,7 +25,7 @@ const navItems = [
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 
-export function Navigation() {
+export function Navigation({ userName }: { userName?: string }) {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
@@ -101,6 +101,11 @@ export function Navigation() {
             })}
           </nav>
           <div className="p-4 border-t border-border">
+            {userName && (
+              <div className="px-2 mb-3 text-sm font-medium text-foreground truncate" title={userName}>
+                {userName}
+              </div>
+            )}
             <button
               onClick={() => signout()}
               className="group flex w-full items-center px-2 py-2.5 text-sm font-medium text-muted-foreground rounded-md hover:bg-destructive/10 hover:text-destructive transition-all"
