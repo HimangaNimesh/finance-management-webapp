@@ -9,8 +9,18 @@ export async function createBudgetPeriod(formData: FormData) {
   const supabase = await createClient()
 
   const start_date = formData.get('start_date') as string
-  const end_date = formData.get('end_date') as string
-  const label = formData.get('label') as string
+
+  // Auto-calculate end_date and label
+  const startDateObj = new Date(start_date + 'T12:00:00Z') // Use noon UTC to avoid timezone shifts
+  const endDateObj = new Date(startDateObj)
+  endDateObj.setUTCMonth(endDateObj.getUTCMonth() + 1)
+  endDateObj.setUTCDate(endDateObj.getUTCDate() - 1)
+  
+  const end_date = endDateObj.toISOString().split('T')[0]
+  
+  const startStr = startDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  const endStr = endDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  const label = `${startStr} - ${endStr}`
 
   // First, deactivate all other periods
   await supabase
@@ -32,6 +42,7 @@ export async function createBudgetPeriod(formData: FormData) {
   }
 
   revalidatePath('/budget')
+  revalidatePath('/settings')
 }
 
 export async function setAllocation(formData: FormData) {

@@ -1,9 +1,10 @@
 import { createClient } from '@/utils/supabase/server'
 import { getActiveWorkspace } from '@/utils/workspace'
-import { createBudgetPeriod, setAllocation } from './actions'
+import { createBudgetPeriod } from './actions'
 import { SubmitButton } from '@/components/SubmitButton'
-import { WalletCards, Plus, AlertCircle } from 'lucide-react'
+import { WalletCards, AlertCircle } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/utils/format'
+import { SetAllocationModal } from './SetAllocationModal'
 
 export default async function BudgetPage() {
   const { workspaceId, currency } = await getActiveWorkspace()
@@ -36,9 +37,12 @@ export default async function BudgetPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Budget</h1>
-        <p className="text-muted-foreground mt-2">Plan your spending for the current period.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Budget</h1>
+          <p className="text-muted-foreground mt-2">Plan your spending for the current period.</p>
+        </div>
+        {activePeriod && <SetAllocationModal categories={categories} budgetPeriodId={activePeriod.id} />}
       </div>
 
       {!activePeriod ? (
@@ -50,18 +54,9 @@ export default async function BudgetPage() {
           </div>
           <form action={createBudgetPeriod} className="space-y-4">
             <div>
-              <label htmlFor="label" className="block text-sm font-medium text-foreground mb-1">Period Label</label>
-              <input type="text" id="label" name="label" required placeholder="e.g. August 2026" className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="start_date" className="block text-sm font-medium text-foreground mb-1">Start Date</label>
-                <input type="date" id="start_date" name="start_date" required className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
-              </div>
-              <div>
-                <label htmlFor="end_date" className="block text-sm font-medium text-foreground mb-1">End Date</label>
-                <input type="date" id="end_date" name="end_date" required className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
-              </div>
+              <label htmlFor="start_date" className="block text-sm font-medium text-foreground mb-1">Start Date</label>
+              <input type="date" id="start_date" name="start_date" required className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+              <p className="text-xs text-muted-foreground mt-1">The budget period will automatically span one full month from this date.</p>
             </div>
             <SubmitButton type="submit" pendingText="Saving..." className="w-full bg-primary text-primary-foreground font-medium rounded-md py-2 px-4 hover:bg-indigo-500 transition-colors mt-4">
               Start Budget Period
@@ -69,9 +64,8 @@ export default async function BudgetPage() {
           </form>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="space-y-6">
+          <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 flex flex-col md:flex-row justify-between items-center gap-4">
               <div>
                 <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
                   {activePeriod.label}
@@ -141,55 +135,6 @@ export default async function BudgetPage() {
               </div>
             </div>
           </div>
-
-          <div className="space-y-6">
-            <div className="bg-card border border-border rounded-xl p-6 shadow-sm sticky top-6">
-              <h2 className="text-lg font-semibold text-foreground mb-4">Set Allocation</h2>
-              <form action={setAllocation} className="space-y-4">
-                <input type="hidden" name="budget_period_id" value={activePeriod.id} />
-                <div>
-                  <label htmlFor="category_id" className="block text-sm font-medium text-foreground mb-1">Category</label>
-                  <select id="category_id" name="category_id" required className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
-                    <option value="">Select a category</option>
-                    {categories?.map(c => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="allocated_amount" className="block text-sm font-medium text-foreground mb-1">Amount</label>
-                  <input type="number" step="0.01" id="allocated_amount" name="allocated_amount" required className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" placeholder="0.00" />
-                </div>
-                <SubmitButton type="submit" pendingText="Creating..." className="w-full bg-primary text-primary-foreground font-medium rounded-md py-2 px-4 hover:bg-indigo-500 transition-colors flex items-center justify-center gap-2">
-                  <Plus className="w-4 h-4" />
-                  Save Allocation
-                </SubmitButton>
-              </form>
-            </div>
-            
-            <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-foreground mb-4">New Period</h2>
-              <p className="text-sm text-muted-foreground mb-4">Start a new budget period. This will deactivate the current one.</p>
-              <form action={createBudgetPeriod} className="space-y-4">
-                <div>
-                  <label htmlFor="label_new" className="block text-sm font-medium text-foreground mb-1">Period Label</label>
-                  <input type="text" id="label_new" name="label" required placeholder="e.g. September 2026" className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
-                </div>
-                <div>
-                  <label htmlFor="start_date_new" className="block text-sm font-medium text-foreground mb-1">Start Date</label>
-                  <input type="date" id="start_date_new" name="start_date" required className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
-                </div>
-                <div>
-                  <label htmlFor="end_date_new" className="block text-sm font-medium text-foreground mb-1">End Date</label>
-                  <input type="date" id="end_date_new" name="end_date" required className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
-                </div>
-                <SubmitButton type="submit" pendingText="Starting..." className="w-full bg-secondary text-secondary-foreground font-medium rounded-md py-2 px-4 hover:bg-secondary/80 transition-colors">
-                  Start New Period
-                </SubmitButton>
-              </form>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   )

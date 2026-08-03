@@ -1,9 +1,10 @@
 import { createClient } from '@/utils/supabase/server'
 import { getActiveWorkspace } from '@/utils/workspace'
 import { removeMember, updateCurrency, updateProfileName, renameWorkspace } from './actions'
+import { createBudgetPeriod } from '@/app/(app)/budget/actions'
 import { SubmitButton } from '@/components/SubmitButton'
 import { InviteForm } from './InviteForm'
-import { Users, Mail, UserMinus, ShieldAlert } from 'lucide-react'
+import { Users, Mail, UserMinus, ShieldAlert, Calendar } from 'lucide-react'
 
 export default async function SettingsPage() {
   const { workspaceId, workspaceName, currency } = await getActiveWorkspace()
@@ -150,6 +151,36 @@ export default async function SettingsPage() {
           <SubmitButton type="submit" pendingText="Saving..." className="bg-secondary text-secondary-foreground font-medium rounded-md py-2 px-4 hover:bg-secondary/80 transition-colors">
             Save Changes
           </SubmitButton>
+        </form>
+      </div>
+
+      <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+        <h2 className="text-xl font-semibold text-foreground mb-1">Budget Period</h2>
+        <p className="text-sm text-muted-foreground mb-4">Start a new budget period for this workspace. This will deactivate the current one.</p>
+
+        <form action={createBudgetPeriod} className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+          <div className="flex-1 w-full sm:max-w-xs">
+            <label htmlFor="start_date" className="block text-sm font-medium text-foreground mb-1">Start Date</label>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-full text-primary shrink-0">
+                <Calendar className="w-5 h-5" />
+              </div>
+              <input 
+                type="date" 
+                id="start_date" 
+                name="start_date" 
+                required 
+                disabled={!isOwner}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed" 
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-2 ml-12">Automatically spans one full month.</p>
+          </div>
+          {isOwner && (
+            <SubmitButton type="submit" pendingText="Starting..." className="w-full sm:w-auto bg-secondary text-secondary-foreground font-medium rounded-md py-2 px-4 hover:bg-secondary/80 transition-colors shrink-0">
+              Start New Period
+            </SubmitButton>
+          )}
         </form>
       </div>
 
