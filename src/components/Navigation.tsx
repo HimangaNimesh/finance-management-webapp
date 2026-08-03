@@ -12,7 +12,8 @@ import {
   Settings, 
   LogOut,
   Menu,
-  X
+  X,
+  PieChart
 } from 'lucide-react'
 import { signout } from '@/app/auth/actions'
 
@@ -22,6 +23,7 @@ const navItems = [
   { name: 'Transactions', href: '/transactions', icon: ArrowRightLeft },
   { name: 'Accounts', href: '/accounts', icon: Landmark },
   { name: 'Categories', href: '/categories', icon: Tags },
+  { name: 'Stats', href: '/stats', icon: PieChart },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 
