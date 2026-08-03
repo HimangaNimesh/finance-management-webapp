@@ -122,14 +122,14 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
                               <Calendar className="w-4 h-4 text-muted-foreground" />
                               {formatDate(date)}
                             </div>
-                            <div className="flex items-center gap-4 text-xs font-medium">
+                            <div className="flex items-center w-full sm:w-auto gap-4 text-xs font-medium mt-1 sm:mt-0">
                               {group.income > 0 && (
                                 <span className="text-success flex items-center gap-1 bg-success/10 px-2 py-0.5 rounded-full">
                                   <TrendingUp className="w-3 h-3" /> {formatCurrency(group.income, currency)}
                                 </span>
                               )}
                               {group.expense > 0 && (
-                                <span className="text-destructive flex items-center gap-1 bg-destructive/10 px-2 py-0.5 rounded-full">
+                                <span className="text-destructive flex items-center gap-1 bg-destructive/10 px-2 py-0.5 rounded-full ml-auto sm:ml-0">
                                   <TrendingDown className="w-3 h-3" /> {formatCurrency(group.expense, currency)}
                                 </span>
                               )}

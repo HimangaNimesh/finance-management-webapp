@@ -18,14 +18,16 @@ export async function addTransaction(formData: FormData) {
   // Find active budget period if applicable (only for income/expense)
   let budget_period_id = null
   if (type !== 'transfer') {
-    const { data: activePeriod } = await supabase
+    const { data: matchingPeriod } = await supabase
       .from('budget_periods')
       .select('id')
       .eq('workspace_id', workspaceId)
-      .eq('is_active', true)
-      .single()
-    if (activePeriod) {
-      budget_period_id = activePeriod.id
+      .lte('start_date', transaction_date)
+      .gte('end_date', transaction_date)
+      .limit(1)
+      .maybeSingle()
+    if (matchingPeriod) {
+      budget_period_id = matchingPeriod.id
     }
   }
 
@@ -86,14 +88,16 @@ export async function editTransaction(formData: FormData) {
   // Fetch active budget period if applicable
   let budget_period_id = null
   if (type !== 'transfer') {
-    const { data: activePeriod } = await supabase
+    const { data: matchingPeriod } = await supabase
       .from('budget_periods')
       .select('id')
       .eq('workspace_id', workspaceId)
-      .eq('is_active', true)
-      .single()
-    if (activePeriod) {
-      budget_period_id = activePeriod.id
+      .lte('start_date', transaction_date)
+      .gte('end_date', transaction_date)
+      .limit(1)
+      .maybeSingle()
+    if (matchingPeriod) {
+      budget_period_id = matchingPeriod.id
     }
   }
 

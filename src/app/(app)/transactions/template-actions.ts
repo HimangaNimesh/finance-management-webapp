@@ -67,13 +67,16 @@ export async function executeTemplate(templateId: string) {
 
   // 2. Determine budget period for expenses
   let budgetPeriodId = null
-  if (template.type === 'expense') {
+  if (template.type === 'expense' || template.type === 'income') {
+    const today = new Date().toISOString().split('T')[0]
     const { data: period } = await supabase
       .from('budget_periods')
       .select('id')
       .eq('workspace_id', workspaceId)
-      .eq('is_active', true)
-      .single()
+      .lte('start_date', today)
+      .gte('end_date', today)
+      .limit(1)
+      .maybeSingle()
     
     if (period) {
       budgetPeriodId = period.id

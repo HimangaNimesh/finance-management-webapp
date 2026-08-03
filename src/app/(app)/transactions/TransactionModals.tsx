@@ -70,7 +70,15 @@ export function TransactionModals({ accounts, categories }: { accounts: Account[
                 </div>
                 <div>
                   <label htmlFor="transaction_date" className="block text-sm font-medium text-foreground mb-1">Date</label>
-                  <input type="date" id="transaction_date" name="transaction_date" required defaultValue={new Date().toISOString().split('T')[0]} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+                  <input 
+                    type="date" 
+                    id="transaction_date" 
+                    name="transaction_date" 
+                    required 
+                    defaultValue={new Date().toISOString().split('T')[0]} 
+                    onClick={(e) => (e.target as HTMLInputElement).showPicker?.()}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" 
+                  />
                 </div>
               </div>
               
