@@ -24,6 +24,7 @@ export default async function BudgetPage() {
     .select('*')
     .eq('workspace_id', workspaceId)
     .eq('type', 'expense')
+    .is('parent_category_id', null)
     .order('name', { ascending: true })
 
   let allocations: any[] = []
