@@ -105,3 +105,10 @@ body {
 .hover-bounce:hover {
   transform: scale(1.02);
 }
+
+/* Prevent iOS Safari from zooming in on input focus by forcing 16px minimum font size */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
