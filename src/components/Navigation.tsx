@@ -16,6 +16,7 @@ import {
   PieChart
 } from 'lucide-react'
 import { signout } from '@/app/auth/actions'
+import { WorkspaceSwitcher, type Workspace } from './WorkspaceSwitcher'
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -27,7 +28,15 @@ const navItems = [
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 
-export function Navigation({ userName }: { userName?: string }) {
+export function Navigation({ 
+  userName, 
+  workspaces, 
+  activeWorkspaceId 
+}: { 
+  userName?: string
+  workspaces: Workspace[]
+  activeWorkspaceId: string
+}) {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
@@ -78,11 +87,14 @@ export function Navigation({ userName }: { userName?: string }) {
           </button>
         </div>
         <div className="flex flex-1 flex-col overflow-y-auto">
+          <div className="p-4 pb-0">
+            <WorkspaceSwitcher workspaces={workspaces} activeWorkspaceId={activeWorkspaceId} />
+          </div>
           <nav className="flex-1 space-y-1 px-4 py-4">
             {navItems.map((item) => {
-              const isActive = pathname === item.href
+              const isActive = pathname.startsWith(item.href)
               return (
-                <Link
+                 <Link
                   key={item.name}
                   href={item.href}
                   className={`group flex items-center px-2 py-2.5 text-sm font-medium rounded-md transition-all ${
@@ -102,7 +114,7 @@ export function Navigation({ userName }: { userName?: string }) {
               )
             })}
           </nav>
-          <div className="p-4 border-t border-border">
+          <div className="p-4 border-t border-border mt-auto">
             {userName && (
               <div className="px-2 mb-3 text-sm font-medium text-foreground truncate" title={userName}>
                 {userName}

@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 
 export async function getActiveWorkspace() {
   const supabase = await createClient()
@@ -15,19 +16,28 @@ export async function getActiveWorkspace() {
     .select('workspace_id, role, workspaces(id, name, currency)')
     .eq('user_id', user.id)
     .order('role', { ascending: false }) // 'owner' comes before 'member'
-    .limit(1)
-    .single()
 
-  if (error || !members) {
-    // If no workspace found, they might need to wait for the trigger or something went wrong.
+  if (error || !members || members.length === 0) {
     throw new Error('No workspace found for user.')
   }
 
+  const cookieStore = await cookies()
+  const activeWorkspaceId = cookieStore.get('active_workspace_id')?.value
+
+  let activeMember = members[0] // fallback to highest role workspace
+
+  if (activeWorkspaceId) {
+    const found = members.find(m => m.workspace_id === activeWorkspaceId)
+    if (found) {
+      activeMember = found
+    }
+  }
+
   return {
-    workspaceId: members.workspace_id,
+    workspaceId: activeMember.workspace_id,
     // @ts-ignore
-    workspaceName: members.workspaces?.name as string,
+    workspaceName: activeMember.workspaces?.name as string,
     // @ts-ignore
-    currency: (members.workspaces?.currency as string) || 'USD'
+    currency: (activeMember.workspaces?.currency as string) || 'USD'
   }
 }
