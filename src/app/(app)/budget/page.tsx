@@ -5,6 +5,7 @@ import { SubmitButton } from '@/components/SubmitButton'
 import { WalletCards, AlertCircle } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/utils/format'
 import { SetAllocationModal } from './SetAllocationModal'
+import { AllocationProgressBar } from './AllocationProgressBar'
 
 export default async function BudgetPage() {
   const { workspaceId, currency } = await getActiveWorkspace()
@@ -28,13 +29,68 @@ export default async function BudgetPage() {
     .order('name', { ascending: true })
 
   let allocations: any[] = []
+  let transactions: any[] = []
+  
   if (activePeriod) {
     const { data } = await supabase
       .from('budget_allocations')
       .select('*, category:categories(name)')
       .eq('budget_period_id', activePeriod.id)
     allocations = data || []
+    
+    // Fetch transactions for breakdown
+    const { data: txs } = await supabase
+      .from('transactions')
+      .select('amount, category_id, category:categories(id, name, parent_category_id)')
+      .eq('budget_period_id', activePeriod.id)
+      .eq('type', 'expense')
+    transactions = txs || []
   }
+
+  // Pre-calculate subcategory breakdowns
+  const categoryBreakdowns: Record<string, any[]> = {}
+  const shadeColors = [
+    'bg-primary',
+    'bg-primary/80',
+    'bg-primary/60',
+    'bg-primary/40',
+    'bg-primary/30',
+    'bg-primary/20',
+  ]
+
+  allocations.forEach(allocation => {
+    const mainCategoryId = allocation.category_id
+    
+    // Find all transactions that belong to this main category or its subcategories
+    const relatedTxs = transactions.filter(t => 
+      t.category_id === mainCategoryId || 
+      (t.category && t.category.parent_category_id === mainCategoryId)
+    )
+    
+    // Group them by their exact category
+    const grouped: Record<string, { id: string, name: string, amount: number }> = {}
+    
+    relatedTxs.forEach(t => {
+      const catId = t.category_id
+      if (!grouped[catId]) {
+        grouped[catId] = {
+          id: catId,
+          name: t.category?.name || 'Unknown',
+          amount: 0
+        }
+      }
+      grouped[catId].amount += Number(t.amount)
+    })
+    
+    // Convert to array and sort by amount descending
+    const breakdownArray = Object.values(grouped).sort((a, b) => b.amount - a.amount)
+    
+    // Assign shades
+    categoryBreakdowns[mainCategoryId] = breakdownArray.map((item, index) => ({
+      ...item,
+      colorClass: shadeColors[index % shadeColors.length]
+    }))
+  })
 
   return (
     <div className="space-y-6">
@@ -88,50 +144,24 @@ export default async function BudgetPage() {
               <div className="px-6 py-4 border-b border-border bg-muted/30">
                 <h3 className="font-semibold text-lg text-foreground">Category Allocations</h3>
               </div>
-              <div className="p-6 space-y-6">
+              <div className="p-6 space-y-2">
                 {allocations.length === 0 ? (
                   <p className="text-center text-muted-foreground py-4">No allocations set yet. Add some to the right.</p>
                 ) : (
-                  allocations.map(allocation => {
-                    const allocated = Number(allocation.allocated_amount)
-                    const spent = Number(allocation.spent_amount)
-                    const remaining = allocated - spent
-                    const percentage = allocated > 0 ? Math.min(100, Math.max(0, (spent / allocated) * 100)) : 0
-                    const isOver = spent > allocated
-                    
-                    return (
-                      <div key={allocation.id} className="space-y-2">
-                        <div className="flex justify-between items-end">
-                          <span className="font-medium text-foreground">{allocation.category?.name || 'Unknown Category'}</span>
-                          <div className="text-right text-sm">
-                            <span className={isOver ? 'text-destructive font-semibold' : 'text-muted-foreground'}>
-                              {formatCurrency(spent, currency)} spent
-                            </span>
-                            <span className="text-muted-foreground mx-1">/</span>
-                            <span className="font-medium">{formatCurrency(allocated, currency)}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="w-full bg-secondary h-2.5 rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full rounded-full ${isOver ? 'bg-destructive' : 'bg-primary'}`} 
-                            style={{ width: `${percentage}%` }}
-                          />
-                        </div>
-                        
-                        <div className="flex justify-between items-center text-xs">
-                          {isOver ? (
-                            <span className="text-destructive flex items-center gap-1">
-                              <AlertCircle className="w-3 h-3" /> Over budget by {formatCurrency(Math.abs(remaining), currency)}
-                            </span>
-                          ) : (
-                            <span className="text-success">{formatCurrency(remaining, currency)} remaining</span>
-                          )}
-                          <span className="text-muted-foreground">{percentage.toFixed(0)}%</span>
-                        </div>
-                      </div>
-                    )
-                  })
+                  allocations.map(allocation => (
+                    <AllocationProgressBar 
+                      key={allocation.id}
+                      allocation={{
+                        id: allocation.id,
+                        category_id: allocation.category_id,
+                        category_name: allocation.category?.name || 'Unknown Category',
+                        allocated_amount: Number(allocation.allocated_amount),
+                        spent_amount: Number(allocation.spent_amount)
+                      }}
+                      breakdown={categoryBreakdowns[allocation.category_id] || []}
+                      currency={currency}
+                    />
+                  ))
                 )}
               </div>
             </div>
