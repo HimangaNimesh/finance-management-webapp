@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Plus, Zap, X } from 'lucide-react'
 import { SubmitButton } from '@/components/SubmitButton'
 import { CategorySelect } from '@/components/CategorySelect'
 import { addTransaction } from './actions'
 import { createTemplate } from './template-actions'
+import { useScrollLock } from '@/hooks/useScrollLock'
 
 type Account = { id: string, name: string }
 type Category = { id: string, name: string, type: string }
@@ -16,15 +17,7 @@ export function TransactionModals({ accounts, categories }: { accounts: Account[
   const [addType, setAddType] = useState('expense')
   const [shortcutType, setShortcutType] = useState('expense')
 
-  // Prevent scrolling when modal is open
-  useEffect(() => {
-    if (isAddOpen || isShortcutOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'auto'
-    }
-    return () => { document.body.style.overflow = 'auto' }
-  }, [isAddOpen, isShortcutOpen])
+  useScrollLock(isAddOpen || isShortcutOpen)
 
   return (
     <div className="flex flex-wrap items-center gap-3">

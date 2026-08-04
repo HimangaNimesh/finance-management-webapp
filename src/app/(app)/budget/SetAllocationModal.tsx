@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Plus, X } from 'lucide-react'
 import { SubmitButton } from '@/components/SubmitButton'
 import { setAllocation } from './actions'
+import { useScrollLock } from '@/hooks/useScrollLock'
 
 type Category = {
   id: string
@@ -19,15 +20,7 @@ export function SetAllocationModal({
 }) {
   const [isOpen, setIsOpen] = useState(false)
 
-  // Prevent scrolling when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'auto'
-    }
-    return () => { document.body.style.overflow = 'auto' }
-  }, [isOpen])
+  useScrollLock(isOpen)
 
   return (
     <>

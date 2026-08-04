@@ -1,11 +1,12 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { X, Save } from 'lucide-react'
 import { SubmitButton } from '@/components/SubmitButton'
 import { CategorySelect } from '@/components/CategorySelect'
 import { editTransaction } from './actions'
+import { useScrollLock } from '@/hooks/useScrollLock'
 
 type Account = { id: string, name: string }
 type Category = { id: string, name: string, type: string }
@@ -27,11 +28,7 @@ export function EditTransactionModal({
     router.push('/transactions', { scroll: false })
   }
 
-  // Prevent scrolling when modal is open
-  useEffect(() => {
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = 'auto' }
-  }, [])
+  useScrollLock(true)
 
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">

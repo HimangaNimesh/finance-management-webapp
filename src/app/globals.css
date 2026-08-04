@@ -91,7 +91,7 @@ body {
 /* Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  to { opacity: 1; transform: none; }
 }
 
 .animate-fade-in {
@@ -111,4 +111,11 @@ body {
   input, select, textarea {
     font-size: 16px !important;
   }
+}
+
+/* Stop all scrolling on iOS Safari when modal is open */
+body.scroll-locked {
+  overflow: hidden !important;
+  touch-action: none !important;
+  overscroll-behavior: none !important;
 }

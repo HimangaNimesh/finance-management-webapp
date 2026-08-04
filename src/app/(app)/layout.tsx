@@ -35,14 +35,14 @@ export default async function AppLayout({
   })) || []
 
   return (
-    <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-background">
+    <div className="flex flex-col md:flex-row min-h-screen bg-background">
       <Navigation 
         userName={fullName} 
         workspaces={workspaces}
         activeWorkspaceId={activeWorkspaceId}
       />
-      <main className="flex-1 overflow-y-auto p-4 md:p-8">
-        <div className="mx-auto max-w-7xl animate-fade-in pb-12 md:pb-0">
+      <main className="flex-1 p-4 md:p-8 w-full">
+        <div className="mx-auto max-w-7xl pb-12 md:pb-0">
           {children}
         </div>
       </main>

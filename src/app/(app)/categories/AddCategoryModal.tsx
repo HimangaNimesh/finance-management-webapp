@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Plus, X } from 'lucide-react'
 import { SubmitButton } from '@/components/SubmitButton'
 import { addCategory } from './actions'
+import { useScrollLock } from '@/hooks/useScrollLock'
 
 type Category = {
   id: string
@@ -16,15 +17,7 @@ export function AddCategoryModal({ categories }: { categories: Category[] | null
   const [isOpen, setIsOpen] = useState(false)
   const [type, setType] = useState('expense')
 
-  // Prevent scrolling when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'auto'
-    }
-    return () => { document.body.style.overflow = 'auto' }
-  }, [isOpen])
+  useScrollLock(isOpen)
 
   const parentCategories = categories?.filter(c => !c.parent_category_id && c.type === type) || []
 
