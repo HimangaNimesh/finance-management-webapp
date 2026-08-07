@@ -69,7 +69,7 @@ export async function setAllocation(formData: FormData) {
     // Calculate initial spent_amount from existing transactions in this category and its subcategories
     const { data: txs } = await supabase
       .from('transactions')
-      .select('amount, category:categories(id, parent_category_id)')
+      .select('amount, category_id, category:categories(id, parent_category_id)')
       .eq('budget_period_id', budget_period_id)
       .eq('type', 'expense')
 
