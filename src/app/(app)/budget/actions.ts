@@ -52,36 +52,38 @@ export async function setAllocation(formData: FormData) {
   const category_id = formData.get('category_id') as string
   const allocated_amount = parseFloat(formData.get('allocated_amount') as string)
 
-  // Upsert allocation
-  const { error } = await supabase.from('budget_allocations').upsert({
-    budget_period_id,
-    category_id,
-    allocated_amount,
-    // Note: spent_amount is 0 by default, trigger handles updates, but we shouldn't overwrite spent_amount here.
-    // Upsert might overwrite spent_amount to default if not careful.
-    // Instead, let's do a select first, or use an ON CONFLICT DO UPDATE.
-  }, { onConflict: 'budget_period_id,category_id' })
+  // Let's do select first to avoid overwriting spent_amount incorrectly
+  const { data: existing } = await supabase
+    .from('budget_allocations')
+    .select('id')
+    .eq('budget_period_id', budget_period_id)
+    .eq('category_id', category_id)
+    .single()
 
-  if (error) {
-    // Manually handle upsert without overwriting spent_amount if Supabase upsert doesn't support partial updates easily.
-    // Let's do select first to be safe.
-    const { data: existing } = await supabase
+  if (existing) {
+    await supabase
       .from('budget_allocations')
-      .select('id')
+      .update({ allocated_amount })
+      .eq('id', existing.id)
+  } else {
+    // Calculate initial spent_amount from existing transactions in this category and its subcategories
+    const { data: txs } = await supabase
+      .from('transactions')
+      .select('amount, category:categories(id, parent_category_id)')
       .eq('budget_period_id', budget_period_id)
-      .eq('category_id', category_id)
-      .single()
+      .eq('type', 'expense')
 
-    if (existing) {
-      await supabase
-        .from('budget_allocations')
-        .update({ allocated_amount })
-        .eq('id', existing.id)
-    } else {
-      await supabase
-        .from('budget_allocations')
-        .insert({ budget_period_id, category_id, allocated_amount, spent_amount: 0 })
+    let initialSpent = 0
+    if (txs) {
+      initialSpent = txs.reduce((sum, t) => {
+        const isMatch = t.category_id === category_id || (t.category && t.category.parent_category_id === category_id)
+        return isMatch ? sum + Number(t.amount) : sum
+      }, 0)
     }
+
+    await supabase
+      .from('budget_allocations')
+      .insert({ budget_period_id, category_id, allocated_amount, spent_amount: initialSpent })
   }
 
   revalidatePath('/budget')
