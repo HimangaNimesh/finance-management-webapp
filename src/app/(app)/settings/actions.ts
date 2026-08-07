@@ -94,3 +94,22 @@ export async function renameWorkspace(formData: FormData) {
 
   revalidatePath('/', 'layout')
 }
+
+export async function updateTransferFee(formData: FormData) {
+  const { workspaceId } = await getActiveWorkspace()
+  const supabase = await createClient()
+
+  const fee = formData.get('transfer_fee_amount') as string
+  const transfer_fee_amount = fee ? parseFloat(fee) : 0
+
+  const { error } = await supabase
+    .from('workspaces')
+    .update({ transfer_fee_amount })
+    .eq('id', workspaceId)
+
+  if (error) {
+    throw new Error('Failed to update transfer fee: ' + error.message)
+  }
+
+  revalidatePath('/settings')
+}

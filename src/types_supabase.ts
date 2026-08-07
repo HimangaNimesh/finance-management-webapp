@@ -235,6 +235,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          linked_transaction_id: string | null
           note: string | null
           transaction_date: string
           to_account_id: string | null
@@ -251,6 +252,7 @@ export type Database = {
           id?: string
           note?: string | null
           transaction_date?: string
+          linked_transaction_id?: string | null
           to_account_id?: string | null
           type: string
           workspace_id: string
@@ -265,6 +267,7 @@ export type Database = {
           id?: string
           note?: string | null
           transaction_date?: string
+          linked_transaction_id?: string | null
           to_account_id?: string | null
           type?: string
           workspace_id?: string
@@ -305,6 +308,13 @@ export type Database = {
             referencedRelation: "accounts"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "transactions_linked_transaction_id_fkey"
+            columns: ["linked_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
         ]
       }
       workspace_members: {
@@ -342,18 +352,21 @@ export type Database = {
           currency: string
           id: string
           name: string
+          transfer_fee_amount: number
         }
         Insert: {
           created_at?: string
           currency?: string
           id?: string
           name: string
+          transfer_fee_amount?: number
         }
         Update: {
           created_at?: string
           currency?: string
           id?: string
           name?: string
+          transfer_fee_amount?: number
         }
         Relationships: []
       }

@@ -1,13 +1,13 @@
 import { createClient } from '@/utils/supabase/server'
 import { getActiveWorkspace } from '@/utils/workspace'
-import { removeMember, updateCurrency, updateProfileName, renameWorkspace } from './actions'
+import { removeMember, updateCurrency, updateProfileName, renameWorkspace, updateTransferFee } from './actions'
 import { createBudgetPeriod } from '@/app/(app)/budget/actions'
 import { SubmitButton } from '@/components/SubmitButton'
 import { InviteForm } from './InviteForm'
 import { Users, Mail, UserMinus, ShieldAlert, Calendar } from 'lucide-react'
 
 export default async function SettingsPage() {
-  const { workspaceId, workspaceName, currency } = await getActiveWorkspace()
+  const { workspaceId, workspaceName, currency, transferFeeAmount } = await getActiveWorkspace()
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -147,6 +147,29 @@ export default async function SettingsPage() {
               <option value="AUD">AUD ($)</option>
               <option value="CAD">CAD ($)</option>
             </select>
+          </div>
+          <SubmitButton type="submit" pendingText="Saving..." className="bg-secondary text-secondary-foreground font-medium rounded-md py-2 px-4 hover:bg-secondary/80 transition-colors">
+            Save Changes
+          </SubmitButton>
+        </form>
+      </div>
+
+      <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+        <h2 className="text-xl font-semibold text-foreground mb-1">Bank Transfer Fee</h2>
+        <p className="text-sm text-muted-foreground mb-4">Set the default automatic fee deducted when transferring money between bank accounts.</p>
+
+        <form action={updateTransferFee} className="flex gap-4 items-end">
+          <div className="flex-1 max-w-xs">
+            <label htmlFor="transfer_fee_amount" className="block text-sm font-medium text-foreground mb-1">Fee Amount ({currency})</label>
+            <input
+              type="number"
+              step="0.01"
+              id="transfer_fee_amount"
+              name="transfer_fee_amount"
+              defaultValue={transferFeeAmount}
+              disabled={!isOwner}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            />
           </div>
           <SubmitButton type="submit" pendingText="Saving..." className="bg-secondary text-secondary-foreground font-medium rounded-md py-2 px-4 hover:bg-secondary/80 transition-colors">
             Save Changes
