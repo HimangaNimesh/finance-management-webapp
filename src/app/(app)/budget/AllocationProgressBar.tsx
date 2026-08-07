@@ -50,7 +50,7 @@ export function AllocationProgressBar({ allocation, breakdown, currency }: Props
           {breakdown.length > 0 && (
             <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
           )}
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+          <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity ml-2">
             <EditAllocationModal allocation={allocation} />
             <DeleteAllocationButton id={allocation.id} />
           </div>
