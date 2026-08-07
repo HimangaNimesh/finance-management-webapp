@@ -88,3 +88,15 @@ export async function setAllocation(formData: FormData) {
 
   revalidatePath('/budget')
 }
+
+export async function deleteAllocation(formData: FormData) {
+  const supabase = await createClient()
+  const id = formData.get('id') as string
+
+  await supabase
+    .from('budget_allocations')
+    .delete()
+    .eq('id', id)
+
+  revalidatePath('/budget')
+}

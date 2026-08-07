@@ -23,7 +23,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   // Fetch transactions with related data
   const { data: transactions } = await supabase
     .from('transactions')
-    .select('*, account:accounts(name), category:categories(name)')
+    .select('*, account:accounts!transactions_account_id_fkey(name), to_account:accounts!transactions_to_account_id_fkey(name), category:categories(name)')
     .eq('workspace_id', workspaceId)
     .order('transaction_date', { ascending: false })
     .order('created_at', { ascending: false })
@@ -150,7 +150,9 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
                                 {tx.type === 'income' && <TrendingUp className="w-3 h-3 text-success" />}
                                 {tx.type === 'transfer' && <ArrowRightLeft className="w-3 h-3 text-muted-foreground" />}
                               </span>
-                              <span className="truncate">{tx.category?.name || '-'}</span>
+                              <span className="truncate">
+                                {tx.type === 'transfer' ? `To: ${tx.to_account?.name || 'Unknown'}` : (tx.category?.name || '-')}
+                              </span>
                             </div>
                           </td>
 
@@ -162,12 +164,14 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
                                 {tx.type === 'transfer' && <ArrowRightLeft className="w-4 h-4 text-muted-foreground shrink-0" />}
                               </div>
                               <span className="font-medium truncate block">{tx.note || 'No description'}</span>
-                              <span className="text-xs text-muted-foreground block md:hidden truncate">{tx.account?.name || '-'}</span>
+                              <span className="text-xs text-muted-foreground block md:hidden truncate">
+                                {tx.type === 'transfer' ? `${tx.account?.name} → ${tx.to_account?.name}` : (tx.account?.name || '-')}
+                              </span>
                             </div>
                           </td>
                           
                           <td className="hidden md:table-cell px-6 py-3 whitespace-nowrap text-sm text-muted-foreground">
-                            {tx.account?.name || '-'}
+                            {tx.type === 'transfer' ? `${tx.account?.name} → ${tx.to_account?.name}` : (tx.account?.name || '-')}
                           </td>
                           
                           <td className={`px-2 md:px-6 py-1 md:py-3 whitespace-nowrap text-sm font-medium text-right order-3 md:order-none block md:table-cell shrink-0 ${

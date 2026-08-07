@@ -11,7 +11,7 @@ import { useScrollLock } from '@/hooks/useScrollLock'
 type Account = { id: string, name: string }
 type Category = { id: string, name: string, type: string }
 
-export function TransactionModals({ accounts, categories }: { accounts: Account[] | null, categories: Category[] | null }) {
+export function TransactionModals({ accounts, categories, isFab = false }: { accounts: Account[] | null, categories: Category[] | null, isFab?: boolean }) {
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [isShortcutOpen, setIsShortcutOpen] = useState(false)
   const [addType, setAddType] = useState('expense')
@@ -20,22 +20,34 @@ export function TransactionModals({ accounts, categories }: { accounts: Account[
   useScrollLock(isAddOpen || isShortcutOpen)
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      <button 
-        onClick={() => setIsAddOpen(true)}
-        className="bg-primary text-primary-foreground font-medium rounded-md py-2 px-4 hover:bg-indigo-500 transition-colors flex items-center gap-2"
-      >
-        <Plus className="w-4 h-4" />
-        Add Transaction
-      </button>
+    <>
+      {isFab ? (
+        <button
+          onClick={() => setIsAddOpen(true)}
+          className="w-14 h-14 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-lg hover:bg-indigo-500 hover:scale-105 transition-all duration-200"
+          aria-label="Add Transaction"
+        >
+          <Plus className="w-6 h-6" />
+        </button>
+      ) : (
+        <div className="flex flex-wrap items-center gap-3">
+          <button 
+            onClick={() => setIsAddOpen(true)}
+            className="bg-primary text-primary-foreground font-medium rounded-md py-2 px-4 hover:bg-indigo-500 transition-colors flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Add Transaction
+          </button>
 
-      <button 
-        onClick={() => setIsShortcutOpen(true)}
-        className="bg-secondary text-secondary-foreground font-medium rounded-md py-2 px-4 hover:bg-secondary/80 transition-colors flex items-center gap-2"
-      >
-        <Zap className="w-4 h-4" />
-        Create Shortcut
-      </button>
+          <button 
+            onClick={() => setIsShortcutOpen(true)}
+            className="bg-secondary text-secondary-foreground font-medium rounded-md py-2 px-4 hover:bg-secondary/80 transition-colors flex items-center gap-2"
+          >
+            <Zap className="w-4 h-4" />
+            Create Shortcut
+          </button>
+        </div>
+      )}
 
       {/* Add Transaction Modal */}
       {isAddOpen && (
@@ -76,7 +88,9 @@ export function TransactionModals({ accounts, categories }: { accounts: Account[
               </div>
               
               <div>
-                <label htmlFor="account_id" className="block text-sm font-medium text-foreground mb-1">Account</label>
+                <label htmlFor="account_id" className="block text-sm font-medium text-foreground mb-1">
+                  {addType === 'transfer' ? 'From Account' : 'Account'}
+                </label>
                 <select id="account_id" name="account_id" required className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
                   {accounts?.map(a => (
                     <option key={a.id} value={a.id}>{a.name}</option>
@@ -84,10 +98,22 @@ export function TransactionModals({ accounts, categories }: { accounts: Account[
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Category (Optional)</label>
-                <CategorySelect categories={categories as any} transactionType={addType} />
-              </div>
+              {addType === 'transfer' ? (
+                <div>
+                  <label htmlFor="to_account_id" className="block text-sm font-medium text-foreground mb-1">To Account</label>
+                  <select id="to_account_id" name="to_account_id" required className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                    <option value="">Select destination...</option>
+                    {accounts?.map(a => (
+                      <option key={a.id} value={a.id}>{a.name}</option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">Category (Optional)</label>
+                  <CategorySelect categories={categories as any} transactionType={addType} />
+                </div>
+              )}
               
               <div>
                 <label htmlFor="amount" className="block text-sm font-medium text-foreground mb-1">Amount</label>
@@ -170,6 +196,6 @@ export function TransactionModals({ accounts, categories }: { accounts: Account[
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }

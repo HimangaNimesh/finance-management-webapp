@@ -237,6 +237,7 @@ export type Database = {
           id: string
           note: string | null
           transaction_date: string
+          to_account_id: string | null
           type: string
           workspace_id: string
         }
@@ -250,6 +251,7 @@ export type Database = {
           id?: string
           note?: string | null
           transaction_date?: string
+          to_account_id?: string | null
           type: string
           workspace_id: string
         }
@@ -263,6 +265,7 @@ export type Database = {
           id?: string
           note?: string | null
           transaction_date?: string
+          to_account_id?: string | null
           type?: string
           workspace_id?: string
         }
@@ -293,6 +296,13 @@ export type Database = {
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_to_account_id_fkey"
+            columns: ["to_account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
             referencedColumns: ["id"]
           },
         ]

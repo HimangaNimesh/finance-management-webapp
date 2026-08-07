@@ -10,6 +10,7 @@ export async function addTransaction(formData: FormData) {
 
   const type = formData.get('type') as string
   const account_id = formData.get('account_id') as string
+  const to_account_id = formData.get('to_account_id') as string || null
   const category_id = formData.get('category_id') as string || null
   const amount = parseFloat(formData.get('amount') as string)
   const transaction_date = formData.get('transaction_date') as string
@@ -34,6 +35,7 @@ export async function addTransaction(formData: FormData) {
   const { error } = await supabase.from('transactions').insert({
     workspace_id: workspaceId,
     account_id,
+    to_account_id,
     category_id,
     budget_period_id,
     type,
@@ -80,6 +82,7 @@ export async function editTransaction(formData: FormData) {
   const id = formData.get('id') as string
   const type = formData.get('type') as string
   const account_id = formData.get('account_id') as string
+  const to_account_id = formData.get('to_account_id') as string || null
   const category_id = formData.get('category_id') as string || null
   const amount = parseFloat(formData.get('amount') as string)
   const transaction_date = formData.get('transaction_date') as string
@@ -105,6 +108,7 @@ export async function editTransaction(formData: FormData) {
     .from('transactions')
     .update({
       account_id,
+      to_account_id,
       category_id,
       budget_period_id,
       type,

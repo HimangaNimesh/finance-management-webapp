@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { AlertCircle, ChevronDown } from 'lucide-react'
 import { formatCurrency } from '@/utils/format'
+import { EditAllocationModal } from './EditAllocationModal'
+import { DeleteAllocationButton } from './DeleteAllocationButton'
 
 type BreakdownItem = {
   id: string
@@ -14,6 +16,7 @@ type BreakdownItem = {
 type Props = {
   allocation: {
     id: string
+    budget_period_id: string
     category_id: string
     category_name: string
     allocated_amount: number
@@ -37,7 +40,7 @@ export function AllocationProgressBar({ allocation, breakdown, currency }: Props
   const scaleBase = isOver ? spent : allocated
 
   return (
-    <div className="space-y-2 group bg-background/30 rounded-lg p-3 -mx-3 transition-colors hover:bg-muted/30">
+    <div className="space-y-2 group bg-background/30 rounded-lg p-3 -mx-3 transition-colors hover:bg-muted/30 relative">
       <div 
         className="flex justify-between items-end cursor-pointer select-none" 
         onClick={() => setIsExpanded(!isExpanded)}
@@ -47,6 +50,10 @@ export function AllocationProgressBar({ allocation, breakdown, currency }: Props
           {breakdown.length > 0 && (
             <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
           )}
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+            <EditAllocationModal allocation={allocation} />
+            <DeleteAllocationButton id={allocation.id} />
+          </div>
         </div>
         <div className="text-right text-sm">
           <span className={isOver ? 'text-destructive font-semibold' : 'text-muted-foreground'}>

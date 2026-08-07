@@ -153,6 +153,7 @@ export default async function BudgetPage() {
                       key={allocation.id}
                       allocation={{
                         id: allocation.id,
+                        budget_period_id: allocation.budget_period_id,
                         category_id: allocation.category_id,
                         category_name: allocation.category?.name || 'Unknown Category',
                         allocated_amount: Number(allocation.allocated_amount),

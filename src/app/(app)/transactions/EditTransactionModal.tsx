@@ -70,7 +70,9 @@ export function EditTransactionModal({
           </div>
           
           <div>
-            <label htmlFor="edit_account_id" className="block text-sm font-medium text-foreground mb-1">Account</label>
+            <label htmlFor="edit_account_id" className="block text-sm font-medium text-foreground mb-1">
+              {type === 'transfer' ? 'From Account' : 'Account'}
+            </label>
             <select id="edit_account_id" name="account_id" required defaultValue={transaction.account_id} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
               {accounts?.map(a => (
                 <option key={a.id} value={a.id}>{a.name}</option>
@@ -78,10 +80,22 @@ export function EditTransactionModal({
             </select>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Category (Optional)</label>
-            <CategorySelect categories={categories as any} transactionType={type} defaultValue={transaction.category_id || ''} />
-          </div>
+          {type === 'transfer' ? (
+            <div>
+              <label htmlFor="edit_to_account_id" className="block text-sm font-medium text-foreground mb-1">To Account</label>
+              <select id="edit_to_account_id" name="to_account_id" required defaultValue={transaction.to_account_id || ''} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="">Select destination...</option>
+                {accounts?.map(a => (
+                  <option key={a.id} value={a.id}>{a.name}</option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">Category (Optional)</label>
+              <CategorySelect categories={categories as any} transactionType={type} defaultValue={transaction.category_id || ''} />
+            </div>
+          )}
           
           <div>
             <label htmlFor="edit_amount" className="block text-sm font-medium text-foreground mb-1">Amount</label>
