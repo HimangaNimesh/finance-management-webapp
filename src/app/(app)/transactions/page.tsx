@@ -11,7 +11,7 @@ import { TransactionRowWrapper } from './TransactionRowWrapper'
 import { EditTransactionModal } from './EditTransactionModal'
 import { DeleteTransactionButton } from './DeleteTransactionButton'
 
-export default async function TransactionsPage({ searchParams }: { searchParams: Promise<{ edit?: string }> | { edit?: string } }) {
+export default async function TransactionsPage({ searchParams }: { searchParams: Promise<{ edit?: string, accountId?: string }> | { edit?: string, accountId?: string } }) {
   const resolvedSearchParams = await searchParams
   const { workspaceId, currency } = await getActiveWorkspace()
   const supabase = await createClient()
@@ -21,10 +21,16 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   const { data: categories } = await supabase.from('categories').select('id, name, type, parent_category_id').eq('workspace_id', workspaceId)
 
   // Fetch transactions with related data
-  const { data: transactions } = await supabase
+  let query = supabase
     .from('transactions')
     .select('*, account:accounts!transactions_account_id_fkey(name), to_account:accounts!transactions_to_account_id_fkey(name), category:categories(name)')
     .eq('workspace_id', workspaceId)
+    
+  if (resolvedSearchParams.accountId) {
+    query = query.or(`account_id.eq.${resolvedSearchParams.accountId},to_account_id.eq.${resolvedSearchParams.accountId}`)
+  }
+
+  const { data: transactions } = await query
     .order('transaction_date', { ascending: false })
     .order('created_at', { ascending: false })
     .limit(50)
@@ -56,8 +62,25 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Transactions</h1>
-          <p className="text-muted-foreground mt-2">View and manage your recent transactions.</p>
+          {resolvedSearchParams.accountId ? (
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                {accounts?.find(a => a.id === resolvedSearchParams.accountId)?.name}
+              </h1>
+              <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full font-medium">Account Filter</span>
+            </div>
+          ) : (
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Transactions</h1>
+          )}
+          <p className="text-muted-foreground mt-2">
+            {resolvedSearchParams.accountId ? (
+              <a href="/accounts" className="text-primary hover:underline flex items-center gap-1 text-sm mt-1">
+                &larr; Back to Accounts
+              </a>
+            ) : (
+              'View and manage your recent transactions.'
+            )}
+          </p>
         </div>
         <TransactionModals accounts={accounts} categories={categories} />
       </div>

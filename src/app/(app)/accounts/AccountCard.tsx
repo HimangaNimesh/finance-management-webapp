@@ -63,7 +63,10 @@ export function AccountCard({ account, currency }: { account: Account, currency:
   }
 
   return (
-    <div className="bg-card border border-border rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between shadow-sm hover:shadow-md transition-shadow gap-4 sm:gap-0">
+    <div 
+      className="bg-card border border-border rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between shadow-sm hover:shadow-md transition-shadow gap-4 sm:gap-0 cursor-pointer"
+      onClick={() => window.location.href = `/transactions?accountId=${account.id}`}
+    >
       <div className="flex items-center gap-4">
         <div className="p-3 bg-primary/10 rounded-full text-primary shrink-0">
           <Landmark className="w-6 h-6" />
@@ -82,7 +85,11 @@ export function AccountCard({ account, currency }: { account: Account, currency:
         </div>
         
         <div className="flex items-center gap-2 border-l border-border pl-4">
-          <button onClick={() => setIsEditing(true)} className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-md transition-colors" title="Edit account">
+          <button 
+            onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} 
+            className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-md transition-colors" 
+            title="Edit account"
+          >
             <Edit2 className="w-4 h-4" />
           </button>
           
@@ -90,7 +97,7 @@ export function AccountCard({ account, currency }: { account: Account, currency:
             if (confirm('Are you sure you want to delete this account?')) {
               await deleteAccount(account.id)
             }
-          }}>
+          }} onClick={(e) => e.stopPropagation()}>
             <SubmitButton type="submit" pendingText="..." className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors" title="Delete account">
               <Trash2 className="w-4 h-4" />
             </SubmitButton>
