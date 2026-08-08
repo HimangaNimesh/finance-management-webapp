@@ -22,6 +22,7 @@ export type Database = {
           name: string
           starting_balance: number
           type: string
+          bank_name: string | null
           workspace_id: string
         }
         Insert: {
@@ -31,6 +32,7 @@ export type Database = {
           name: string
           starting_balance?: number
           type: string
+          bank_name?: string | null
           workspace_id: string
         }
         Update: {
@@ -40,6 +42,7 @@ export type Database = {
           name?: string
           starting_balance?: number
           type?: string
+          bank_name?: string | null
           workspace_id?: string
         }
         Relationships: [

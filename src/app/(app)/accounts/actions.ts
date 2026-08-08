@@ -10,12 +10,14 @@ export async function addAccount(formData: FormData) {
 
   const name = formData.get('name') as string
   const type = formData.get('type') as string
+  const bank_name = (formData.get('bank_name') as string) || null
   const starting_balance = parseFloat(formData.get('starting_balance') as string)
 
   const { error } = await supabase.from('accounts').insert({
     workspace_id: workspaceId,
     name,
     type,
+    bank_name,
     starting_balance,
     current_balance: starting_balance,
   })
@@ -51,6 +53,7 @@ export async function editAccount(formData: FormData) {
   const id = formData.get('id') as string
   const name = formData.get('name') as string
   const type = formData.get('type') as string
+  const bank_name = (formData.get('bank_name') as string) || null
   const new_starting_balance = parseFloat(formData.get('starting_balance') as string)
 
   // Fetch the old account to calculate balance difference
@@ -73,6 +76,7 @@ export async function editAccount(formData: FormData) {
     .update({
       name,
       type,
+      bank_name,
       starting_balance: new_starting_balance,
       current_balance: new_current_balance,
     })

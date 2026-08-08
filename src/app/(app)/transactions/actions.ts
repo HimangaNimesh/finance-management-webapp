@@ -54,13 +54,13 @@ export async function addTransaction(formData: FormData) {
     // Get account names to check exemption rule
     const { data: accounts } = await supabase
       .from('accounts')
-      .select('id, name')
+      .select('id, name, bank_name')
       .in('id', [account_id, to_account_id])
     
-    const fromAccount = accounts?.find(a => a.id === account_id)?.name
-    const toAccount = accounts?.find(a => a.id === to_account_id)?.name
+    const fromBank = accounts?.find(a => a.id === account_id)?.bank_name
+    const toBank = accounts?.find(a => a.id === to_account_id)?.bank_name
 
-    const isExempt = fromAccount === 'HNB Main' && toAccount === 'HNB debit card'
+    const isExempt = !!fromBank && !!toBank && fromBank === toBank
 
     if (!isExempt) {
       const { error: feeError } = await supabase.from('transactions').insert({
@@ -158,12 +158,12 @@ export async function editTransaction(formData: FormData) {
   if (type === 'transfer' && to_account_id) {
     const { data: accounts } = await supabase
       .from('accounts')
-      .select('id, name')
+      .select('id, name, bank_name')
       .in('id', [account_id, to_account_id])
     
-    const fromAccount = accounts?.find(a => a.id === account_id)?.name
-    const toAccount = accounts?.find(a => a.id === to_account_id)?.name
-    const isExempt = fromAccount === 'HNB Main' && toAccount === 'HNB debit card'
+    const fromBank = accounts?.find(a => a.id === account_id)?.bank_name
+    const toBank = accounts?.find(a => a.id === to_account_id)?.bank_name
+    const isExempt = !!fromBank && !!toBank && fromBank === toBank
 
     // Check if a linked fee transaction already exists
     const { data: existingFee } = await supabase

@@ -12,10 +12,12 @@ type Account = {
   type: string
   starting_balance: number
   current_balance: number
+  bank_name?: string | null
 }
 
 export function AccountCard({ account, currency }: { account: Account, currency: string }) {
   const [isEditing, setIsEditing] = useState(false)
+  const [editType, setEditType] = useState(account.type)
 
   if (isEditing) {
     return (
@@ -34,7 +36,13 @@ export function AccountCard({ account, currency }: { account: Account, currency:
             
             <div>
               <label htmlFor={`type-${account.id}`} className="block text-xs font-medium text-muted-foreground mb-1">Account Type</label>
-              <select id={`type-${account.id}`} name="type" defaultValue={account.type} className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+              <select 
+                id={`type-${account.id}`} 
+                name="type" 
+                value={editType}
+                onChange={(e) => setEditType(e.target.value)}
+                className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              >
                 <option value="bank">Bank Account</option>
                 <option value="card">Credit Card</option>
                 <option value="cash">Cash</option>
@@ -42,6 +50,13 @@ export function AccountCard({ account, currency }: { account: Account, currency:
                 <option value="other">Other</option>
               </select>
             </div>
+
+            {(editType === 'bank' || editType === 'card') && (
+              <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+                <label htmlFor={`bank-${account.id}`} className="block text-xs font-medium text-muted-foreground mb-1">Bank Name (Optional)</label>
+                <input type="text" id={`bank-${account.id}`} name="bank_name" defaultValue={account.bank_name || ''} className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+              </div>
+            )}
 
             <div>
               <label htmlFor={`balance-${account.id}`} className="block text-xs font-medium text-muted-foreground mb-1">Starting Balance</label>
@@ -73,7 +88,9 @@ export function AccountCard({ account, currency }: { account: Account, currency:
         </div>
         <div>
           <h3 className="font-semibold text-foreground text-lg">{account.name}</h3>
-          <p className="text-sm text-muted-foreground capitalize">{account.type}</p>
+          <p className="text-sm text-muted-foreground capitalize">
+            {account.type} {account.bank_name ? `• ${account.bank_name}` : ''}
+          </p>
         </div>
       </div>
       <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
