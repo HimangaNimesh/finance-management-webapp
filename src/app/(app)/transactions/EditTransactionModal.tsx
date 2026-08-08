@@ -111,6 +111,13 @@ export function EditTransactionModal({
             <input type="text" id="edit_note" name="note" defaultValue={transaction.note || ''} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Description" />
           </div>
 
+          {type === 'transfer' && (
+            <div className="flex items-center gap-2">
+              <input type="checkbox" id="edit_apply_atm_fee" name="apply_atm_fee" value="true" defaultChecked={transaction.has_atm_fee || false} className="rounded border-input text-primary focus:ring-primary" />
+              <label htmlFor="edit_apply_atm_fee" className="text-sm font-medium text-foreground">Apply ATM Fee</label>
+            </div>
+          )}
+
           <div className="pt-2">
             <SubmitButton type="submit" pendingText="Saving..." className="w-full bg-primary text-primary-foreground font-medium rounded-md py-2 px-4 hover:bg-indigo-500 transition-colors flex items-center justify-center gap-2">
               <Save className="w-4 h-4" />

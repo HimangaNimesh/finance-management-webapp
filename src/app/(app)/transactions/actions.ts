@@ -5,7 +5,7 @@ import { getActiveWorkspace } from '@/utils/workspace'
 import { revalidatePath } from 'next/cache'
 
 export async function addTransaction(formData: FormData) {
-  const { workspaceId, transferFeeAmount } = await getActiveWorkspace()
+  const { workspaceId, transferFeeAmount, atmFeeAmount } = await getActiveWorkspace()
   const supabase = await createClient()
 
   const type = formData.get('type') as string
@@ -15,6 +15,7 @@ export async function addTransaction(formData: FormData) {
   const amount = parseFloat(formData.get('amount') as string)
   const transaction_date = formData.get('transaction_date') as string
   const note = formData.get('note') as string
+  const apply_atm_fee = formData.get('apply_atm_fee') === 'true'
 
   // Find active budget period if applicable (only for income/expense)
   let budget_period_id = null
@@ -42,6 +43,7 @@ export async function addTransaction(formData: FormData) {
     amount,
     transaction_date,
     note,
+    has_atm_fee: type === 'transfer' ? apply_atm_fee : false,
     created_by: (await supabase.auth.getUser()).data.user?.id
   }).select('id').single()
 
@@ -54,13 +56,16 @@ export async function addTransaction(formData: FormData) {
     // Get account names to check exemption rule
     const { data: accounts } = await supabase
       .from('accounts')
-      .select('id, name, bank_name')
+      .select('id, name, bank_name, type')
       .in('id', [account_id, to_account_id])
     
-    const fromBank = accounts?.find(a => a.id === account_id)?.bank_name
-    const toBank = accounts?.find(a => a.id === to_account_id)?.bank_name
+    const fromAccount = accounts?.find(a => a.id === account_id)
+    const toAccount = accounts?.find(a => a.id === to_account_id)
 
-    const isExempt = !!fromBank && !!toBank && fromBank === toBank
+    const isSameBank = !!fromAccount?.bank_name && !!toAccount?.bank_name && fromAccount.bank_name === toAccount.bank_name
+    const isNotBankTransfer = fromAccount?.type !== 'bank' || toAccount?.type !== 'bank'
+
+    const isExempt = isSameBank || isNotBankTransfer
 
     if (!isExempt) {
       const { error: feeError } = await supabase.from('transactions').insert({
@@ -75,6 +80,22 @@ export async function addTransaction(formData: FormData) {
       })
       if (feeError) {
         console.error('Failed to create transfer fee:', feeError)
+      }
+    }
+
+    if (apply_atm_fee && atmFeeAmount > 0) {
+      const { error: atmFeeError } = await supabase.from('transactions').insert({
+        workspace_id: workspaceId,
+        account_id,
+        type: 'expense',
+        amount: atmFeeAmount,
+        transaction_date,
+        note: 'ATM Fee',
+        linked_transaction_id: tx.id,
+        created_by: (await supabase.auth.getUser()).data.user?.id
+      })
+      if (atmFeeError) {
+        console.error('Failed to create ATM fee:', atmFeeError)
       }
     }
   }
@@ -106,7 +127,7 @@ export async function deleteTransaction(transactionId: string) {
 }
 
 export async function editTransaction(formData: FormData) {
-  const { workspaceId } = await getActiveWorkspace()
+  const { workspaceId, transferFeeAmount, atmFeeAmount } = await getActiveWorkspace()
   const supabase = await createClient()
 
   const id = formData.get('id') as string
@@ -117,6 +138,7 @@ export async function editTransaction(formData: FormData) {
   const amount = parseFloat(formData.get('amount') as string)
   const transaction_date = formData.get('transaction_date') as string
   const note = formData.get('note') as string
+  const apply_atm_fee = formData.get('apply_atm_fee') === 'true'
 
   // Fetch active budget period if applicable
   let budget_period_id = null
@@ -145,6 +167,7 @@ export async function editTransaction(formData: FormData) {
       amount,
       transaction_date,
       note,
+      has_atm_fee: type === 'transfer' ? apply_atm_fee : false,
     })
     .eq('id', id)
     .eq('workspace_id', workspaceId)
@@ -154,22 +177,26 @@ export async function editTransaction(formData: FormData) {
   }
 
   // Handle transfer fee logic for edits
-  const { transferFeeAmount } = await getActiveWorkspace()
   if (type === 'transfer' && to_account_id) {
     const { data: accounts } = await supabase
       .from('accounts')
-      .select('id, name, bank_name')
+      .select('id, name, bank_name, type')
       .in('id', [account_id, to_account_id])
     
-    const fromBank = accounts?.find(a => a.id === account_id)?.bank_name
-    const toBank = accounts?.find(a => a.id === to_account_id)?.bank_name
-    const isExempt = !!fromBank && !!toBank && fromBank === toBank
+    const fromAccount = accounts?.find(a => a.id === account_id)
+    const toAccount = accounts?.find(a => a.id === to_account_id)
+    
+    const isSameBank = !!fromAccount?.bank_name && !!toAccount?.bank_name && fromAccount.bank_name === toAccount.bank_name
+    const isNotBankTransfer = fromAccount?.type !== 'bank' || toAccount?.type !== 'bank'
+
+    const isExempt = isSameBank || isNotBankTransfer
 
     // Check if a linked fee transaction already exists
     const { data: existingFee } = await supabase
       .from('transactions')
       .select('id')
       .eq('linked_transaction_id', id)
+      .eq('note', 'Bank Transfer Fee')
       .maybeSingle()
 
     if (isExempt || transferFeeAmount <= 0) {
@@ -194,6 +221,39 @@ export async function editTransaction(formData: FormData) {
           linked_transaction_id: id,
           created_by: (await supabase.auth.getUser()).data.user?.id
         })
+      }
+    }
+
+    // Handle ATM Fee logic for edits
+    const { data: existingAtmFee } = await supabase
+      .from('transactions')
+      .select('id')
+      .eq('linked_transaction_id', id)
+      .eq('note', 'ATM Fee')
+      .maybeSingle()
+
+    if (apply_atm_fee && atmFeeAmount > 0) {
+      if (existingAtmFee) {
+        await supabase.from('transactions').update({
+          account_id,
+          amount: atmFeeAmount,
+          transaction_date
+        }).eq('id', existingAtmFee.id)
+      } else {
+        await supabase.from('transactions').insert({
+          workspace_id: workspaceId,
+          account_id,
+          type: 'expense',
+          amount: atmFeeAmount,
+          transaction_date,
+          note: 'ATM Fee',
+          linked_transaction_id: id,
+          created_by: (await supabase.auth.getUser()).data.user?.id
+        })
+      }
+    } else {
+      if (existingAtmFee) {
+        await supabase.from('transactions').delete().eq('id', existingAtmFee.id)
       }
     }
   }

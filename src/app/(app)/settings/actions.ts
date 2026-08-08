@@ -113,3 +113,22 @@ export async function updateTransferFee(formData: FormData) {
 
   revalidatePath('/settings')
 }
+
+export async function updateAtmFee(formData: FormData) {
+  const { workspaceId } = await getActiveWorkspace()
+  const supabase = await createClient()
+
+  const fee = formData.get('atm_fee_amount') as string
+  const atm_fee_amount = fee ? parseFloat(fee) : 0
+
+  const { error } = await supabase
+    .from('workspaces')
+    .update({ atm_fee_amount })
+    .eq('id', workspaceId)
+
+  if (error) {
+    throw new Error('Failed to update ATM fee: ' + error.message)
+  }
+
+  revalidatePath('/settings')
+}

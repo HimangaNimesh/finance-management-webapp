@@ -13,7 +13,7 @@ export async function getActiveWorkspace() {
   // Get user's workspaces
   const { data: members, error } = await supabase
     .from('workspace_members')
-    .select('workspace_id, role, workspaces(id, name, currency, transfer_fee_amount)')
+    .select('workspace_id, role, workspaces(id, name, currency, transfer_fee_amount, atm_fee_amount)')
     .eq('user_id', user.id)
     .order('role', { ascending: false }) // 'owner' comes before 'member'
 
@@ -40,6 +40,8 @@ export async function getActiveWorkspace() {
     // @ts-ignore
     currency: (activeMember.workspaces?.currency as string) || 'USD',
     // @ts-ignore
-    transferFeeAmount: (activeMember.workspaces?.transfer_fee_amount as number) || 0
+    transferFeeAmount: (activeMember.workspaces?.transfer_fee_amount as number) || 0,
+    // @ts-ignore
+    atmFeeAmount: (activeMember.workspaces?.atm_fee_amount as number) || 30.00
   }
 }

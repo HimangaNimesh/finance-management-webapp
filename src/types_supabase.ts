@@ -16,33 +16,33 @@ export type Database = {
     Tables: {
       accounts: {
         Row: {
+          bank_name: string | null
           created_at: string
           current_balance: number
           id: string
           name: string
           starting_balance: number
           type: string
-          bank_name: string | null
           workspace_id: string
         }
         Insert: {
+          bank_name?: string | null
           created_at?: string
           current_balance?: number
           id?: string
           name: string
           starting_balance?: number
           type: string
-          bank_name?: string | null
           workspace_id: string
         }
         Update: {
+          bank_name?: string | null
           created_at?: string
           current_balance?: number
           id?: string
           name?: string
           starting_balance?: number
           type?: string
-          bank_name?: string | null
           workspace_id?: string
         }
         Relationships: [
@@ -237,11 +237,12 @@ export type Database = {
           category_id: string | null
           created_at: string
           created_by: string | null
+          has_atm_fee: boolean | null
           id: string
           linked_transaction_id: string | null
           note: string | null
-          transaction_date: string
           to_account_id: string | null
+          transaction_date: string
           type: string
           workspace_id: string
         }
@@ -252,11 +253,12 @@ export type Database = {
           category_id?: string | null
           created_at?: string
           created_by?: string | null
+          has_atm_fee?: boolean | null
           id?: string
-          note?: string | null
-          transaction_date?: string
           linked_transaction_id?: string | null
+          note?: string | null
           to_account_id?: string | null
+          transaction_date?: string
           type: string
           workspace_id: string
         }
@@ -267,11 +269,12 @@ export type Database = {
           category_id?: string | null
           created_at?: string
           created_by?: string | null
+          has_atm_fee?: boolean | null
           id?: string
-          note?: string | null
-          transaction_date?: string
           linked_transaction_id?: string | null
+          note?: string | null
           to_account_id?: string | null
+          transaction_date?: string
           type?: string
           workspace_id?: string
         }
@@ -298,10 +301,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "transactions_workspace_id_fkey"
-            columns: ["workspace_id"]
+            foreignKeyName: "transactions_linked_transaction_id_fkey"
+            columns: ["linked_transaction_id"]
             isOneToOne: false
-            referencedRelation: "workspaces"
+            referencedRelation: "transactions"
             referencedColumns: ["id"]
           },
           {
@@ -312,10 +315,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "transactions_linked_transaction_id_fkey"
-            columns: ["linked_transaction_id"]
+            foreignKeyName: "transactions_workspace_id_fkey"
+            columns: ["workspace_id"]
             isOneToOne: false
-            referencedRelation: "transactions"
+            referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
         ]
@@ -351,6 +354,7 @@ export type Database = {
       }
       workspaces: {
         Row: {
+          atm_fee_amount: number
           created_at: string
           currency: string
           id: string
@@ -358,6 +362,7 @@ export type Database = {
           transfer_fee_amount: number
         }
         Insert: {
+          atm_fee_amount?: number
           created_at?: string
           currency?: string
           id?: string
@@ -365,6 +370,7 @@ export type Database = {
           transfer_fee_amount?: number
         }
         Update: {
+          atm_fee_amount?: number
           created_at?: string
           currency?: string
           id?: string
@@ -516,3 +522,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+

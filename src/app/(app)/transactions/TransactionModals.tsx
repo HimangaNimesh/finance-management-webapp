@@ -125,6 +125,13 @@ export function TransactionModals({ accounts, categories, isFab = false }: { acc
                 <input type="text" id="note" name="note" className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Description" />
               </div>
 
+              {addType === 'transfer' && (
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="apply_atm_fee" name="apply_atm_fee" value="true" className="rounded border-input text-primary focus:ring-primary" />
+                  <label htmlFor="apply_atm_fee" className="text-sm font-medium text-foreground">Apply ATM Fee</label>
+                </div>
+              )}
+
               <div className="pt-2">
                 <SubmitButton type="submit" pendingText="Adding..." className="w-full bg-primary text-primary-foreground font-medium rounded-md py-2 px-4 hover:bg-indigo-500 transition-colors flex items-center justify-center gap-2">
                   <Plus className="w-4 h-4" />
