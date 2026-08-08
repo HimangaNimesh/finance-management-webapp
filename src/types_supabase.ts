@@ -20,6 +20,7 @@ export type Database = {
           created_at: string
           current_balance: number
           id: string
+          is_savings_account: boolean | null
           name: string
           starting_balance: number
           type: string
@@ -30,6 +31,7 @@ export type Database = {
           created_at?: string
           current_balance?: number
           id?: string
+          is_savings_account?: boolean | null
           name: string
           starting_balance?: number
           type: string
@@ -40,6 +42,7 @@ export type Database = {
           created_at?: string
           current_balance?: number
           id?: string
+          is_savings_account?: boolean | null
           name?: string
           starting_balance?: number
           type?: string

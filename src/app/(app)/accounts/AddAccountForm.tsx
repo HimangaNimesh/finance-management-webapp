@@ -40,6 +40,13 @@ export function AddAccountForm() {
           </div>
         )}
 
+        {accountType === 'bank' && (
+          <div className="animate-in fade-in slide-in-from-top-2 duration-200 flex items-center gap-2">
+            <input type="checkbox" id="is_savings_account" name="is_savings_account" value="true" className="rounded border-input text-primary focus:ring-primary" />
+            <label htmlFor="is_savings_account" className="text-sm font-medium text-foreground">Savings Account</label>
+          </div>
+        )}
+
         <div>
           <label htmlFor="starting_balance" className="block text-sm font-medium text-foreground mb-1">Starting Balance</label>
           <input type="number" step="0.01" id="starting_balance" name="starting_balance" required defaultValue={0} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />

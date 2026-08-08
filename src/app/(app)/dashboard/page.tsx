@@ -10,9 +10,9 @@ export default async function DashboardPage() {
   const { workspaceId, workspaceName, currency } = await getActiveWorkspace()
   const supabase = await createClient()
 
-  // Accounts Balance
-  const { data: accounts } = await supabase.from('accounts').select('current_balance').eq('workspace_id', workspaceId)
-  const totalBalance = accounts?.reduce((sum, acc) => sum + Number(acc.current_balance), 0) || 0
+  // Accounts Balance (Excluding Savings Accounts)
+  const { data: accounts } = await supabase.from('accounts').select('current_balance, is_savings_account').eq('workspace_id', workspaceId)
+  const totalBalance = accounts?.reduce((sum, acc) => acc.is_savings_account ? sum : sum + Number(acc.current_balance), 0) || 0
 
   // Active Budget Period
   const { data: activePeriod } = await supabase

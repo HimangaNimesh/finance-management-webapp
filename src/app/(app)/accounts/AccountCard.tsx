@@ -13,6 +13,7 @@ type Account = {
   starting_balance: number
   current_balance: number
   bank_name?: string | null
+  is_savings_account?: boolean | null
 }
 
 export function AccountCard({ account, currency }: { account: Account, currency: string }) {
@@ -58,6 +59,13 @@ export function AccountCard({ account, currency }: { account: Account, currency:
               </div>
             )}
 
+            {editType === 'bank' && (
+              <div className="animate-in fade-in slide-in-from-top-2 duration-200 flex items-center gap-2">
+                <input type="checkbox" id={`savings-${account.id}`} name="is_savings_account" value="true" defaultChecked={account.is_savings_account || false} className="rounded border-input text-primary focus:ring-primary" />
+                <label htmlFor={`savings-${account.id}`} className="text-xs font-medium text-foreground">Savings Account</label>
+              </div>
+            )}
+
             <div>
               <label htmlFor={`balance-${account.id}`} className="block text-xs font-medium text-muted-foreground mb-1">Starting Balance</label>
               <input type="number" step="0.01" id={`balance-${account.id}`} name="starting_balance" defaultValue={account.starting_balance} required className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
@@ -89,7 +97,7 @@ export function AccountCard({ account, currency }: { account: Account, currency:
         <div>
           <h3 className="font-semibold text-foreground text-lg">{account.name}</h3>
           <p className="text-sm text-muted-foreground capitalize">
-            {account.type} {account.bank_name ? `• ${account.bank_name}` : ''}
+            {account.is_savings_account ? 'Savings ' : ''}{account.type} {account.bank_name ? `• ${account.bank_name}` : ''}
           </p>
         </div>
       </div>
