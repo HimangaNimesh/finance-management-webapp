@@ -1,5 +1,5 @@
 'use client'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 
 export function TransactionRowWrapper({ 
   children, 
@@ -11,10 +11,18 @@ export function TransactionRowWrapper({
   className?: string 
 }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
   
+  const handleClick = () => {
+    const newParams = new URLSearchParams(searchParams.toString())
+    newParams.set('edit', txId)
+    router.push(`${pathname}?${newParams.toString()}`, { scroll: false })
+  }
+
   return (
     <tr 
-      onClick={() => router.push(`?edit=${txId}`, { scroll: false })} 
+      onClick={handleClick} 
       className={`cursor-pointer ${className}`}
     >
       {children}

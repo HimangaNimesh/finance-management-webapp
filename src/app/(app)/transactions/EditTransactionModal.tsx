@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { X, Save } from 'lucide-react'
 import { SubmitButton } from '@/components/SubmitButton'
@@ -22,10 +22,14 @@ export function EditTransactionModal({
   categories: Category[] | null 
 }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
   const [type, setType] = useState(transaction.type)
 
   const close = () => {
-    router.push('/transactions', { scroll: false })
+    const newParams = new URLSearchParams(searchParams.toString())
+    newParams.delete('edit')
+    router.push(`${pathname}?${newParams.toString()}`, { scroll: false })
   }
 
   useScrollLock(true)
