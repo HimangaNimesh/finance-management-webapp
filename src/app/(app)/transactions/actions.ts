@@ -263,3 +263,29 @@ export async function editTransaction(formData: FormData) {
   revalidatePath('/budget')
   revalidatePath('/accounts')
 }
+
+export async function getMoreTransactions(offset: number, accountId?: string) {
+  const { workspaceId } = await getActiveWorkspace()
+  const supabase = await createClient()
+
+  let query = supabase
+    .from('transactions')
+    .select('*, account:accounts!transactions_account_id_fkey(name), to_account:accounts!transactions_to_account_id_fkey(name), category:categories(name)')
+    .eq('workspace_id', workspaceId)
+    
+  if (accountId) {
+    query = query.or(`account_id.eq.${accountId},to_account_id.eq.${accountId}`)
+  }
+
+  const { data: transactions, error } = await query
+    .order('transaction_date', { ascending: false })
+    .order('created_at', { ascending: false })
+    .range(offset, offset + 49)
+
+  if (error) {
+    console.error('Failed to fetch more transactions:', error)
+    return []
+  }
+
+  return transactions || []
+}
